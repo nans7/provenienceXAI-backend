@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { isEmail } from "../utils/validation.js";
 
 const contactSchema = new mongoose.Schema(
   {
@@ -9,11 +10,12 @@ const contactSchema = new mongoose.Schema(
       required: true,
       trim: true,
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email address"],
+      maxlength: 254,
+      validate: { validator: isEmail, message: "Invalid email address" },
     },
-    countryCode: { type: String, trim: true, default: "+91" },
-    phone: { type: String, trim: true },
-    interest: { type: String, trim: true },
+    countryCode: { type: String, trim: true, default: "+91", maxlength: 20 },
+    phone: { type: String, trim: true, maxlength: 60 },
+    interest: { type: String, trim: true, maxlength: 120 },
     message: { type: String, required: true, trim: true, maxlength: 5000 },
   },
   { timestamps: true },

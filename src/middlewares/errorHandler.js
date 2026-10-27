@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
-import { env } from "../config/env.js";
+import { env } from "../config/credential-config.js";
 import { logger } from "../utils/logger.js";
 
 export function notFound(req, res, next) {
@@ -10,7 +10,15 @@ export function notFound(req, res, next) {
 export function errorHandler(err, req, res, _next) {
   let error = err;
 
-  if (err instanceof mongoose.Error.ValidationError) {
+  if (err.type === "entity.parse.failed") {
+    error = ApiError.badRequest("Invalid JSON body");
+  } else if (err.type === "entity.too.large") {
+    error = new ApiError(413, "Request body is too large");
+  } else if (["encoding.unsupported", "charset.unsupported"].includes(err.type)) {
+    error = new ApiError(415, "Unsupported request encoding");
+  } else if (["request.aborted", "request.size.invalid"].includes(err.type)) {
+    error = ApiError.badRequest("Invalid request body");
+  } else if (err instanceof mongoose.Error.ValidationError) {
     const details = Object.values(err.errors).map((e) => ({ field: e.path, message: e.message }));
     error = ApiError.badRequest("Validation failed", details);
   } else if (err instanceof mongoose.Error.CastError) {

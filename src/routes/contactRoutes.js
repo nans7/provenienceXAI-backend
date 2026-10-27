@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { requireAdmin } from "../middlewares/requireAdmin.js";
 import {
   createContact,
   deleteContact,
@@ -8,7 +9,7 @@ import {
 
 const router = Router();
 
-router.route("/").post(createContact).get(getContacts);
-router.route("/:id").get(getContactById).delete(deleteContact);
+router.route("/").post(createContact).get(requireAdmin, getContacts);
+router.route("/:id").get(requireAdmin, getContactById).delete(requireAdmin, deleteContact);
 
 export default router;
